@@ -43,7 +43,7 @@ async def get_user_info(name):
         'name': info['name'],
         '创建日期': info['birthday'],
         '安等': info['security_status'],
-        '简介': info['description'][:30]
+        # '简介': info['description'][:30]
     }, allow_unicode=True), security_status_feedback(info['security_status'])
 
 
@@ -100,12 +100,22 @@ async def search_price(name):
     return yaml.dump(result[:3], allow_unicode=True)
 
 
+async def status():
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get('https://esi.evepc.163.com/latest/status')
+            return True
+        except Exception as why:
+            print(why)
+            return False
+
+
 async def run():
     # result = await search_user_name('马鹿sama')
-    result = await get_user_info('马鹿sama')
+    # result = await status()
     # result = await market(24505)
     # result = await search_price('三钛')
-    # result = await market(34)
+    result = await market(34)
     print(result)
 
 
