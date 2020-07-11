@@ -1,6 +1,12 @@
-import json
 import re
-from nonebot import on_command, CommandSession, RequestSession, get_bot
+import arrow
+from nonebot import (
+    on_command,
+    CommandSession,
+    RequestSession,
+    get_bot,
+)
+from nonebot.permission import SUPERUSER
 from nonebot.typing import Context_T
 from nonebot.helpers import send
 from nonebot.log import logger
@@ -49,7 +55,7 @@ async def del_key(session: CommandSession):
     if len(stripped_arg.split()) < 2:
         await session.send("看不懂啦！")
     else:
-        key, word = stripped_arg.split()[0], stripped_arg.split()[1]
+        key, word = stripped_arg.split()[0], stripped_arg.split()[1:]
         res = redis_client.srem(key, word)
         if res == 1:
             await session.send("如果你不想听我就不说了")
@@ -79,10 +85,64 @@ async def _(session: CommandSession):
     if user_info is not None:
         result = str(user_info)
         if feedback:
-            result += f', {feedback}'
+            result += f'\n{feedback}'
         await session.send(result)
     else:
         await session.send(f'不知道出啥问题了,咕咕')
+
+
+@on_command('签到', only_to_me=False)
+async def _(session: CommandSession):
+    # user_name = session.ctx['sender']['card'].split('-')[-1]
+    user_account = session.ctx['user_id']
+
+    if redis_client.get(user_account):
+        await session.send('都签到过了还想签, 羊毛怪')
+        return
+
+    redis_client.set(user_account, 1)
+    expire = arrow.now().shift(days=1).floor('days') - arrow.now()
+    redis_client.expire(user_account, expire)
+
+    redis_client.hincrby('coin', user_account, 1)
+
+    ad = '10积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
+
+    user_coin = redis_client.hget('coin', user_account)
+
+    await session.send(f'''
+    当前积分为{user_coin}
+    ______________________
+    {ad}
+    ''', at_sender=True)
+
+
+@on_command('兑换', only_to_me=False, permission=SUPERUSER)
+async def _(session: CommandSession):
+    operating_account = session.current_arg_text.strip()
+
+    user_account = session.ctx['user_id']
+
+    if operating_account == '':
+        await session.send('告诉咕咕鸟对方账号啦')
+        return
+    user_coin = redis_client.hget('coin', operating_account)
+    if user_coin and int(user_coin) > 10:
+        redis_client.hincrby('coin', operating_account, -10)
+        await session.send('兑换成功, 星捷快运, 贴心服务')
+    else:
+        await session.send('没有那么多积分, 还想薅羊毛你')
+        return
+
+    ad = '10积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
+
+    user_coin = redis_client.hget('coin', operating_account)
+
+    await session.send(f'''
+    当前积分为{user_coin}
+    ______________________
+    {ad}
+    ''', at_sender=True)
 
 
 @on_command("help", only_to_me=False)
@@ -99,7 +159,7 @@ info 查询群名称个人信息\n\
 async def _(ctx: Context_T) -> None:
     sentence = str(ctx['message'])
     logger.debug(sentence)
-    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita']:
+    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到']:
         return
 
     keywords = redis_client.keys()
@@ -109,6 +169,3 @@ async def _(ctx: Context_T) -> None:
             word = redis_client.srandmember(keywords[index])
             await send(bot, ctx, word)
             return
-
-
-

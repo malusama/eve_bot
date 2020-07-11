@@ -11,6 +11,7 @@ httpx = "*"
 redis = "*"
 pyyaml = "*"
 xmltodict = "*"
+arrow = "*"
 
 [requires]
 python_version = "3.8"
