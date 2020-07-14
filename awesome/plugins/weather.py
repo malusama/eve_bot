@@ -127,14 +127,14 @@ async def _(session: CommandSession):
         await session.send('告诉咕咕鸟对方账号啦')
         return
     user_coin = redis_client.hget('coin', operating_account)
-    if user_coin and int(user_coin) > 10:
-        redis_client.hincrby('coin', operating_account, -10)
+    if user_coin and int(user_coin) > 5:
+        redis_client.hincrby('coin', operating_account, -5)
         await session.send('兑换成功, 星捷快运, 贴心服务')
     else:
         await session.send('没有那么多积分, 还想薅羊毛你')
         return
 
-    ad = '10积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
+    ad = '5积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
 
     user_coin = redis_client.hget('coin', operating_account)
 
