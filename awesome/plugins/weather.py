@@ -106,7 +106,7 @@ async def _(session: CommandSession):
 
     redis_client.hincrby('coin', user_account, 1)
 
-    ad = '10积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
+    ad = '5积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
 
     user_coin = redis_client.hget('coin', user_account)
 
