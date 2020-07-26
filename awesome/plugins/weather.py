@@ -1,5 +1,6 @@
 import re
 import arrow
+import random
 from nonebot import (
     on_command,
     CommandSession,
@@ -20,6 +21,12 @@ from eve_api import (
 )
 
 bot = get_bot()
+
+AD = """
+    5积分可以兑换 白板苍鹭一艘, 详情咨询马鹿
+    马鹿同时收购黑渊挖坟特产, 吉他收单价95折
+    30积分抽奖活动开发中
+    """
 
 
 @on_command('test', only_to_me=False)
@@ -106,14 +113,12 @@ async def _(session: CommandSession):
 
     redis_client.hincrby('coin', user_account, 1)
 
-    ad = '5积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
-
     user_coin = redis_client.hget('coin', user_account)
 
     await session.send(f'''
     当前积分为{user_coin}
     ______________________
-    {ad}
+    {AD}
     ''', at_sender=True)
 
 
@@ -127,21 +132,59 @@ async def _(session: CommandSession):
         await session.send('告诉咕咕鸟对方账号啦')
         return
     user_coin = redis_client.hget('coin', operating_account)
-    if user_coin and int(user_coin) > 5:
+    if user_coin and int(user_coin) >= 5:
         redis_client.hincrby('coin', operating_account, -5)
         await session.send('兑换成功, 星捷快运, 贴心服务')
     else:
         await session.send('没有那么多积分, 还想薅羊毛你')
         return
 
-    ad = '5积分可以兑换 星捷快运 运费券一张!详情咨询 mosike'
-
     user_coin = redis_client.hget('coin', operating_account)
 
     await session.send(f'''
     当前积分为{user_coin}
     ______________________
-    {ad}
+    {AD}
+    ''', at_sender=True)
+
+
+@on_command('积分', only_to_me=False)
+async def _(session: CommandSession):
+    user_account = session.ctx['user_id']
+    user_coin = redis_client.hget('coin', user_account)
+    await session.send(f'''
+        当前积分为{user_coin}
+        ______________________
+        {AD}
+    ''', at_sender=True)
+
+
+def get_prize(score: int):
+    if 0 < score <= 10:
+        return 1, '皮特姆爆炸护盾增效器 A型'
+    elif 10 < score <= 20:
+        return 2, '皮特姆电磁护盾增效器 A型'
+    elif 20 < score <= 30:
+        return 3, '皮特姆中型护盾回充增量器 C型'
+    elif 95 < score <= 100:
+        return 4, '皮特姆多普式护盾增强器 A型'
+    else:
+        return 5, '你的积分咕咕鸟收下了, 但是什么都不会给你.'
+
+
+@on_command('抽奖', only_to_me=False)
+async def _(session: CommandSession):
+    user_account = session.ctx['user_id']
+    user_coin = redis_client.hget('coin', user_account)
+
+    score = random.randint(0, 100)
+    type_id, prize = get_prize(score)
+    await session.send(f'''
+        ---测试中---
+        抽奖结果: {prize}
+        当前积分为{user_coin}
+        ______________________
+        {AD}
     ''', at_sender=True)
 
 
@@ -159,7 +202,7 @@ info 查询群名称个人信息\n\
 async def _(ctx: Context_T) -> None:
     sentence = str(ctx['message'])
     logger.debug(sentence)
-    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到', '兑换']:
+    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到', '兑换', '积分', '抽奖']:
         return
 
     keywords = redis_client.keys()
