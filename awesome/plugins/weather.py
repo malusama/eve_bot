@@ -159,7 +159,7 @@ info 查询群名称个人信息\n\
 async def _(ctx: Context_T) -> None:
     sentence = str(ctx['message'])
     logger.debug(sentence)
-    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到']:
+    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到', '兑换']:
         return
 
     keywords = redis_client.keys()
