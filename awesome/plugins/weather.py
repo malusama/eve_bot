@@ -160,13 +160,13 @@ async def _(session: CommandSession):
 
 
 def get_prize(score: int):
-    if 0 < score <= 10:
+    if 0 < score <= 50:
         return 1, '皮特姆爆炸护盾增效器 A型'
-    elif 10 < score <= 20:
+    elif 50 < score <= 100:
         return 2, '皮特姆电磁护盾增效器 A型'
-    elif 20 < score <= 30:
+    elif 100 < score <= 150:
         return 3, '皮特姆中型护盾回充增量器 C型'
-    elif 95 < score <= 100:
+    elif 995 < score <= 1000:
         return 4, '皮特姆多普式护盾增强器 A型'
     else:
         return 5, '你的积分咕咕鸟收下了, 但是什么都不会给你.'
@@ -177,10 +177,15 @@ async def _(session: CommandSession):
     user_account = session.ctx['user_id']
     user_coin = redis_client.hget('coin', user_account)
 
-    score = random.randint(0, 100)
+    if user_coin < 30:
+        await session.send('没积分还想抽奖你')
+        return
+
+    redis_client.hincrby('coin', user_account, -30)
+
+    score = random.randint(0, 1000)
     type_id, prize = get_prize(score)
     await session.send(f'''
-        ---测试中---
         抽奖结果: {prize}
         当前积分为{user_coin}
         ______________________
