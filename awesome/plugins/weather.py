@@ -179,6 +179,10 @@ async def _(session: CommandSession):
 
     score = random.randint(0, 1000)
     type_id, prize = get_prize(score)
+
+    if type_id < 5:
+        redis_client.hset('prize', user_account, prize)
+
     await session.send(f'''
         抽奖结果: {prize}
         当前积分为{redis_client.hget('coin', user_account)}
