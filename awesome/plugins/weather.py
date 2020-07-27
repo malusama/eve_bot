@@ -187,7 +187,7 @@ async def _(session: CommandSession):
     type_id, prize = get_prize(score)
     await session.send(f'''
         抽奖结果: {prize}
-        当前积分为{user_coin}
+        当前积分为{redis_client.hget('coin', user_account)}
         ______________________
         {AD}
     ''', at_sender=True)
