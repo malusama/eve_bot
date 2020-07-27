@@ -177,7 +177,7 @@ async def _(session: CommandSession):
     user_account = session.ctx['user_id']
     user_coin = redis_client.hget('coin', user_account)
 
-    if user_coin < 30:
+    if int(user_coin) < 30:
         await session.send('没积分还想抽奖你')
         return
 
