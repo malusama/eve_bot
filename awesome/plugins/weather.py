@@ -117,8 +117,6 @@ async def _(session: CommandSession):
 
     await session.send(f'''
     当前积分为{user_coin}
-    ______________________
-    {AD}
     ''', at_sender=True)
 
 
@@ -143,8 +141,6 @@ async def _(session: CommandSession):
 
     await session.send(f'''
     当前积分为{user_coin}
-    ______________________
-    {AD}
     ''', at_sender=True)
 
 
@@ -154,8 +150,6 @@ async def _(session: CommandSession):
     user_coin = redis_client.hget('coin', user_account)
     await session.send(f'''
         当前积分为{user_coin}
-        ______________________
-        {AD}
     ''', at_sender=True)
 
 
@@ -188,8 +182,6 @@ async def _(session: CommandSession):
     await session.send(f'''
         抽奖结果: {prize}
         当前积分为{redis_client.hget('coin', user_account)}
-        ______________________
-        {AD}
     ''', at_sender=True)
 
 
