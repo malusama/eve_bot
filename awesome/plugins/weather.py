@@ -40,6 +40,8 @@ async def add(session: CommandSession):
     stripped_arg = session.current_arg_text.strip()
     if len(stripped_arg.split()) < 2:
         await session.send("输入错误")
+    elif stripped_arg.split()[-1] == '帅':
+        await session.send('咕咕鸟从来不骗人, 不能说这句')
     else:
         keyword, sentence = stripped_arg.split()[0], ''.join(
             str(i) for i in stripped_arg.split()[1:])
