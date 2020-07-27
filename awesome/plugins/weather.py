@@ -62,7 +62,7 @@ async def del_key(session: CommandSession):
     if len(stripped_arg.split()) < 2:
         await session.send("看不懂啦！")
     else:
-        key, word = stripped_arg.split()[0], stripped_arg.split()[1:]
+        key, word = stripped_arg.split()[0], stripped_arg.split()[-1]
         res = redis_client.srem(key, word)
         if res == 1:
             await session.send("如果你不想听我就不说了")
