@@ -220,10 +220,7 @@ async def _(session: CommandSession):
         await session.send(f'抽到{rand}, 略略略~, 积分池有{total_coin}积分了.')
     else:
         total_coin = redis_client.get('total_coin')
-        if int(total_coin) <= 9:
-            redis_client.hincrby('coin', user_account, 5)
-        else:
-            redis_client.hincrby('coin', user_account, int(total_coin) + 5)
+        redis_client.hincrby('coin', user_account, int(total_coin) + 5)
         redis_client.set('total_coin', 0)
         await session.send(f'抽到{rand}, 都给你吧, {total_coin}积分')
 
