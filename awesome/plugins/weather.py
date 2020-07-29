@@ -201,11 +201,44 @@ info 查询群名称个人信息\n\
 没有其他的了...")
 
 
+@on_command("柏青哥", only_to_me=False)
+async def _(session: CommandSession):
+    user_account = session.ctx['user_id']
+    user_coin = redis_client.hget('coin', user_account)
+
+    if int(user_coin) < 5:
+        await session.send('这种场所不允许未成年进入!')
+        return
+
+    redis_client.hincrby('coin', user_account, -5)
+
+    rand = random.randint(0, 100)
+
+    if rand <= 55:
+        redis_client.incr('total_coin', 4)
+        total_coin = redis_client.get('total_coin')
+        await session.send(f'抽到{rand}, 略略略~, 积分池有{total_coin}积分了.')
+    else:
+        total_coin = redis_client.get('total_coin')
+        if int(total_coin) <= 9:
+            redis_client.hincrby('coin', user_account, 5)
+        else:
+            redis_client.hincrby('coin', user_account, int(total_coin) + 5)
+        redis_client.set('total_coin', 0)
+        await session.send(f'抽到{rand}, 都给你吧, {total_coin}积分')
+
+
+@on_command('积分池', only_to_me=False)
+async def _(session: CommandSession):
+    total_coin = redis_client.get('total_coin')
+    await session.send(f'当前积分池有 {total_coin} 积分')
+
+
 @bot.on_message('group')
 async def _(ctx: Context_T) -> None:
     sentence = str(ctx['message'])
     logger.debug(sentence)
-    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到', '兑换', '积分', '抽奖']:
+    if sentence.split()[0] in ['add', 'list', 'del', 'help', 'info', 'jita', '签到', '兑换', '积分', '抽奖', '柏青哥', '积分池']:
         return
 
     keywords = redis_client.keys()
